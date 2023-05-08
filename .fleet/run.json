@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "type": "cargo",
+            "name": "cargo run",
+            "cargoArgs": ["run"],
+        },
+        {
+            "type": "cargo",
+            "name": "cargo check",
+            "cargoArgs": ["check"],
+        },
+        
+    ]
+}
