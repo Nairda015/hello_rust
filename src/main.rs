@@ -1,4 +1,4 @@
-use std::{thread, time::Duration, collections::HashMap, hash::Hash};
+use std::{thread, time::Duration, collections::{HashMap, hash_map::Entry}, hash::Hash};
 
 fn main() {
     let intensivity = 10;
@@ -34,7 +34,7 @@ fn generate_workout(intensivity: u32, random_number: u32) {
 #[derive(Debug)]
 struct Cacher<T, K, V>
 where
-    T: Fn(&K) -> &V,
+    T: Fn(K) -> V,
     K: Hash + Eq,
     V: Copy
 {
@@ -44,7 +44,7 @@ where
 
 impl<T, K, V> Cacher<T, K, V>
 where
-    T: for<'a> Fn(&'a K) -> &'a V,
+    T: Fn(K) -> V,
     K: Hash + Eq + Copy,
     V: Copy
 {
@@ -55,15 +55,12 @@ where
         }
     }
 
-    fn value(&mut self, arg: K) -> V {
-        match self.values.get(&arg) {
-            Some(v) => *v,
-            None => {
-                let key = arg.clone();
-                let value = (self.calcualtion)(&arg);
-                self.values.insert(key, *value);
-                *value
-            }
-        }
+    fn value(&mut self, arg: K) -> &V {
+        let value = match self.values.entry(arg) {
+            Entry::Occupied(o) => o.into_mut(),
+            Entry::Vacant(v) => v.insert((self.calcualtion)(arg)),
+        };
+
+        value
     }
 }
