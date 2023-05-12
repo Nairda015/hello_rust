@@ -1,16 +1,10 @@
-use std::{thread, time::Duration};
+use std::{thread, time::Duration, collections::HashMap};
 
 fn main() {
     let intensivity = 10;
     let random_number = 7;
 
-    generate_workout(intensivity, random_number)
-}
-
-fn simulate_expensive_calculations(intensivity: u32) -> u32 {
-    println!("calculating slowly...");
-    thread::sleep(Duration::from_secs(2));
-    intensivity
+    generate_workout(intensivity, random_number);
 }
 
 fn generate_workout(intensivity: u32, random_number: u32) {
@@ -33,14 +27,17 @@ fn generate_workout(intensivity: u32, random_number: u32) {
             );
         }
     }
+
+    println!("{:#?}", cached_result.values)
 }
 
+#[derive(Debug)]
 struct Cacher<T>
 where
     T: Fn(u32) -> u32,
 {
     calcualtion: T,
-    value: Option<u32>,
+    values: HashMap<u32, u32>,
 }
 
 impl<T> Cacher<T>
@@ -50,17 +47,17 @@ where
     fn new(calculation: T) -> Cacher<T> {
         Cacher {
             calcualtion: calculation,
-            value: None,
+            values: HashMap::new(),
         }
     }
 
     fn value(&mut self, arg: u32) -> u32 {
-        match self.value {
-            Some(v) => v,
+        match self.values.get(&arg) {
+            Some(v) => *v,
             None => {
-                let v = (self.calcualtion)(arg);
-                self.value = Some(v);
-                v
+                let value = (self.calcualtion)(arg);
+                self.values.insert(arg, value);
+                value
             }
         }
     }
