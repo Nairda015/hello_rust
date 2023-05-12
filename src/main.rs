@@ -1,29 +1,29 @@
 use std::{thread, time::Duration, collections::{HashMap, hash_map::Entry}, hash::Hash};
 
 fn main() {
-    let intensivity = 10;
+    let intensity = 10;
     let random_number = 7;
 
-    generate_workout(intensivity, random_number);
+    generate_workout(intensity, random_number);
 }
 
-fn generate_workout(intensivity: u32, random_number: u32) {
+fn generate_workout(intensity: u32, random_number: u32) {
     let mut cached_result = Cacher::new(|num| {
         println!("calculating slowly...");
         thread::sleep(Duration::from_secs(2));
         num
     });
 
-    if intensivity < 25 {
-        println!("Today, do {} pushups!", cached_result.value(intensivity));
-        println!("Next, do {} situps!", cached_result.value(intensivity));
+    if intensity < 25 {
+        println!("Today, do {} pushups!", cached_result.value(intensity));
+        println!("Next, do {} situps!", cached_result.value(intensity));
     } else {
         if random_number == 3 {
             println!("Take a break")
         } else {
             println!(
                 "Today, run for {} minutes!",
-                cached_result.value(intensivity)
+                cached_result.value(intensity)
             );
         }
     }
@@ -33,32 +33,27 @@ fn generate_workout(intensivity: u32, random_number: u32) {
 
 #[derive(Debug)]
 struct Cacher<T, K, V>
-where
-    T: Fn(K) -> V,
-    K: Hash + Eq,
-    V: Copy
 {
-    calcualtion: T,
+    calculation: T,
     values: HashMap<K, V>,
 }
 
 impl<T, K, V> Cacher<T, K, V>
 where
     T: Fn(K) -> V,
-    K: Hash + Eq + Copy,
-    V: Copy
+    K: Hash + Eq + Clone,
 {
     fn new(calculation: T) -> Cacher<T, K, V> {
         Cacher {
-            calcualtion: calculation,
+            calculation,
             values: HashMap::new(),
         }
     }
 
     fn value(&mut self, arg: K) -> &V {
-        let value = match self.values.entry(arg) {
+        let value = match self.values.entry(arg.clone()) {
             Entry::Occupied(o) => o.into_mut(),
-            Entry::Vacant(v) => v.insert((self.calcualtion)(arg)),
+            Entry::Vacant(v) => v.insert((self.calculation)(arg)),
         };
 
         value
