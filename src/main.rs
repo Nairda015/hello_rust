@@ -1,6 +1,11 @@
+use std::rc::Rc;
+
 fn main() {
-    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+    let list = Rc::new(Cons(1, Rc::new(Cons(2, Rc::new(Cons(3, Rc::new(Nil)))))));
     println!("{:#?}", list);
+
+    let blist = Cons(10, Rc::clone(&list));
+    let clist = Cons(20, Rc::clone(&list));
 
     let x = 5;
     let y = MyBox::new(x);
@@ -27,7 +32,7 @@ use std::ops::Deref;
 use List::{Cons, Nil};
 #[derive(Debug)]
 enum List {
-    Cons(i32, Box<List>),
+    Cons(i32, Rc<List>),
     Nil,
 }
 
